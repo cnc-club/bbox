@@ -1,0 +1,74 @@
+G64 p0.01
+G0z5 a0 x0 y0
+G21 (All units in mm)
+
+(Pass at depth -200.0)
+(Start cutting path id: path6792 at depth -0.125)
+(path len: 121.32770)
+(Change tool to Tangent knife)
+T1M6G43
+G00 Z5.000000
+G00 X9.200799 Y9.173978
+(Subpath start)
+G00 Z1.875000  (Lift up)
+G00 A86.007782  (Turn knife)
+G01 Z-0.125000  F10000.0 (Penetrate back)
+G01 Z-0.125000 F10000.0(Penetrate)
+G01 X11.389872 Y40.540404 Z-0.125000 F10000.000000
+G00 Z1.875000  (Lift up)
+G00 A-7.984436  (Turn knife)
+G01 Z-0.125000  F10000.0 (Penetrate back)
+G03 X24.884012 Y39.598643 Z-0.125000 I13.494140 J96.205412 A0.000000
+G03 X38.378152 Y40.540404 Z-0.125000 I0.000000 J97.147176 A7.984436
+G00 Z1.875000  (Lift up)
+G00 A-86.007783  (Turn knife)
+G01 Z-0.125000  F10000.0 (Penetrate back)
+G01 X40.567225 Y9.173978 Z-0.125000
+G00 Z1.875000  (Lift up)
+G00 A-180.000000  (Turn knife)
+G01 Z-0.125000  F10000.0 (Penetrate back)
+G01 X9.200799 Y9.173978 Z-0.125000
+(Subpath end)
+G00 Z5.000000
+
+(End cutting path id: path6792 at depth -0.125)
+
+
+(Pass at depth -200.0)
+(Start cutting path id: path8294 at depth -0.125)
+(path len: 188.84693)
+(Change tool to Tangent knife)
+T1M6G43
+G00 Z5.000000
+G00 X0.405464 Y0.346297
+(Subpath start)
+G00 Z1.875000  (Lift up)
+G00 A86.007780  (Turn knife)
+G01 Z-0.125000  F10000.0 (Penetrate back)
+G01 Z-0.125000 F10000.0(Penetrate)
+G01 X3.812765 Y49.168230 Z-0.125000 F10000.000000
+G00 Z1.875000  (Lift up)
+G00 A-7.984459  (Turn knife)
+G01 Z-0.125000  F10000.0 (Penetrate back)
+G03 X24.816436 Y47.702372 Z-0.125000 I21.003671 J149.743574 A-0.000000
+G03 X45.820108 Y49.168230 Z-0.125000 I-0.000000 J151.209456 A7.984459
+G00 Z1.875000  (Lift up)
+G00 A-86.007784  (Turn knife)
+G01 Z-0.125000  F10000.0 (Penetrate back)
+G01 X49.227405 Y0.346297 Z-0.125000
+G00 Z1.875000  (Lift up)
+G00 A-180.000000  (Turn knife)
+G01 Z-0.125000  F10000.0 (Penetrate back)
+G01 X0.405464 Y0.346297 Z-0.125000
+(Subpath end)
+G00 Z5.000000
+
+(End cutting path id: path8294 at depth -0.125)
+
+G00 Z5
+
+T1M6G43
+
+G00 A0 X0 Y0
+
+(end)M02

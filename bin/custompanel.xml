@@ -1,0 +1,4 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<pyvcp>
+	<button halpin="set-zero" text="Set Zero" font="('Fixed',16)" />
+</pyvcp>
