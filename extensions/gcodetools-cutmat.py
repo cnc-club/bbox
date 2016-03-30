@@ -250,6 +250,12 @@ styles = {
 				'line':		simplestyle.formatStyle({ 'stroke': '#f88', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' }),
 				'area':		simplestyle.formatStyle({ 'stroke': '#777', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.1' }),
 			},
+		"biarc_style_error" : {
+				'biarc0':	simplestyle.formatStyle({ 'stroke': '#f55', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'5' }),
+				'biarc1':	simplestyle.formatStyle({ 'stroke': '#f55', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'5' }),
+				'line':		simplestyle.formatStyle({ 'stroke': '#f55', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'5' }),
+				'area':		simplestyle.formatStyle({ 'stroke': '#f55', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.7' }),
+			},
 		"biarc_style_dark" : {
 				'biarc0':	simplestyle.formatStyle({ 'stroke': '#33a', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' }),
 				'biarc1':	simplestyle.formatStyle({ 'stroke': '#3a3', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' }),
@@ -4007,7 +4013,14 @@ class Gcodetools(inkex.Effect):
 
 	def cutmat_get_depths(self, layer, path): 
 				if self.tools[layer][0]['id'] == "precise" :
-					depths = [1.0, 0.51, -0.125] # TODO: to dialog
+					s = self.options.multicut
+					depths = []
+					for l in s.split(";"):
+						try :
+							f = float(l)
+							depths.append( self.options.box_prepare_a - (self.options.box_prepare_a+0.125)*f/100 )
+						except :	
+							pass
 				elif self.tools[layer][0]['id'][:4].lower() == "vrow" :
 #					st = path.get("style")
 #					st = simplestyle.parseStyle(st)
@@ -4513,6 +4526,9 @@ class Gcodetools(inkex.Effect):
 		self.OptionParser.add_option("",   "--box-prepare-c",		action="store", type="float", 		dest="box_prepare_c", default=10.,	help="See inx-file.")
 		self.OptionParser.add_option("",   "--box-prepare-d",		action="store", type="float", 		dest="box_prepare_d", default=10.,	help="See inx-file.")
 		self.OptionParser.add_option("",   "--box-prepare-e",		action="store", type="float", 		dest="box_prepare_e", default=60.,	help="See inx-file.")
+
+		self.OptionParser.add_option("",   "--multicut",		action="store", type="string", 		dest="multicut", default="10;50;100",	help="See inx-file.")
+
 		
 		self.OptionParser.add_option("",   "--box-prepare-kind",		action="store", type="float", 		dest="box_prepare_kind", default=10.,	help="See inx-file.")
 		self.OptionParser.add_option("",   "--hand-cut",		action="store", type="inkbool", 		dest="hand_cut", default=False,	help="See inx-file.")
@@ -4521,6 +4537,8 @@ class Gcodetools(inkex.Effect):
 		self.OptionParser.add_option("",   "--test-3", action="store", type="float",	dest="test_3", default=10.,help="Test parameters")
 		self.OptionParser.add_option("",   "--test-string",	action="store", type="string", 	dest="test_string", default='',	help="See inx.")		
 		self.OptionParser.add_option("",   "--test-profile",	action="store", type="inkbool", 	dest="test_profile", default=False,	help="See inx.")		
+
+
 
 		self.OptionParser.add_option("", "--op-x-offset", action="store", type="string", dest="op_x_offset", default="0.0", help='X coordinate for (0, 0) orientation point, such as "10mm", "3in", etc')
 		self.OptionParser.add_option("", "--op-y-offset", action="store", type="string", dest="op_y_offset", default="0.0", help='Y coordinate for (0, 0) orientation point, such as "10mm", "3in", etc')
@@ -4688,7 +4706,7 @@ class Gcodetools(inkex.Effect):
 			style['biarc%s_r'%i]["marker-start"] = "url(#DrawCurveMarker_r)"
 			del(style['biarc%s_r'%i]["marker-end"])
 			style['biarc%s_r'%i] = simplestyle.formatStyle(style['biarc%s_r'%i])
-		
+
 		if group==None:
 			if "preview_groups" not in dir(self) :
 				self.preview_groups = { layer: inkex.etree.SubElement( self.layers[min(1,len(self.layers)-1)], inkex.addNS('g','svg'), {"gcodetools": "Preview group"} ) }
@@ -4741,7 +4759,13 @@ class Gcodetools(inkex.Effect):
 						a_end = a_st*1
 						a_st = a_st+a
 						st = style['biarc%s_r'%(arcn%2)]
-					
+					if r<1 :	
+						st = simplestyle.parseStyle(st)
+						st['stroke'] = "#F22"
+						st['stroke-width'] = '2'
+						st = simplestyle.formatStyle(st)
+
+	
 					attr = {
 							'style': st,
 							 inkex.addNS('cx','sodipodi'):		str(c[0]),
@@ -5671,77 +5695,31 @@ class Gcodetools(inkex.Effect):
 					for subcurve in curve[1] :
 						self.draw_curve(subcurve, layer)
 					
-				if self.options.path_to_gcode_order == 'subpath by subpath':
-					curves_ = []
-					for curve in curves :
-						curves_ += [ [curve[0],[subcurve]]  for subcurve in curve[1] ]  
-					curves = curves_	
-
-					self.options.path_to_gcode_order = 'path by path'
 					
-				if self.options.path_to_gcode_order == 'path by path':
-					if self.options.path_to_gcode_sort_paths :
-						keys = sort_curves( [curve[1] for curve in curves] )
-					else :
-						keys = range(len(curves))
-					for key in keys:
-						d = curves[key][0][1]
-						gcode += gcode_comment_str("\nStart cutting path id: %s at depth: %s" % (curves[key][0][0],d))
-						for step in range( 0,  int(ceil( abs((zs-d)/self.tools[layer][0]["depth step"] )) ) ):
-							#z = max(d, zs - abs(self.tools[layer][0]["depth step"]*(step+1)))
+				if self.options.path_to_gcode_sort_paths :
+					keys = sort_curves( [curve[1] for curve in curves] )
+				else :
+					keys = range(len(curves))
+				for key in keys:
+					self.error(key)
+					d = curves[key][0][1]
+					gcode += gcode_comment_str("\nStart cutting path id: %s at depth: %s" % (curves[key][0][0],d))
+					l = 0 
+					for c in curves[key][1] :
+						b = Biarc() 
+						b.from_old_style(c)
+						l += b.l()
+					gcode += gcode_comment_str("path len: %0.5f"%l)
+					
+					if curves[key][0][2] != "()" :
+						gcode += curves[key][0][2] # add comment
+						
+					for curve in curves[key][1]:
+						self.error(depths)
+						gcode += self.generate_gcode(curve, layer, depths)
 							
-							#gcode += gcode_comment_str("path id: %s at depth step: %s" % (curves[key][0][0], z))
-							
-							# add comment with path len
-							l = 0 
-							for c in curves[key][1] :
-								b = Biarc() 
-								b.from_old_style(c)
-								l += b.l()
-							gcode += gcode_comment_str("path len: %0.5f"%l)
-							
-							if curves[key][0][2] != "()" :
-								gcode += curves[key][0][2] # add comment
-								
-							for curve in curves[key][1]:
-								gcode += self.generate_gcode(curve, layer, depths)
-								
-						#gcode += gcode_comment_str("End cutting path id: %s at depth: %s" % (curves[key][0][0],d))
-							
-				else:	# pass by pass
-					mind = min( [curve[0][1] for curve in curves] )	
-					for step in range( 0,  int(ceil( abs((zs-mind)/self.tools[layer][0]["depth step"] )) ) ):
-						z = zs - abs(self.tools[layer][0]["depth step"]*(step))
-						curves_ = []
-						for curve in curves:
-							if curve[0][1]<z : 
-								curves_.append(curve)
-
-						z = zs - abs(self.tools[layer][0]["depth step"]*(step+1))
-						gcode += "\n(Pass at depth %s)\n"%z
-
-						if self.options.path_to_gcode_sort_paths :
-							keys = sort_curves( [curve[1] for curve in curves_] )		
-						else :
-							keys = range(len(curves_))
-						for key in keys:
-				
-							gcode += gcode_comment_str("Start cutting path id: %s at depth %s"%(curves[key][0][0],max(z,curves_[key][0][1])))
-							if curves[key][0][2] != "()" :
-								gcode += curves[key][0][2] # add comment
-								
-							# add comment with path len
-							l = 0 
-							for c in curves_[key][1] :
-								b = Biarc() 
-								b.from_old_style(c)
-								l += b.l()
-							gcode += gcode_comment_str("path len: %0.5f"%l)
-
-							for subcurve in curves_[key][1]:
-								gcode += self.generate_gcode(subcurve, layer, max(z,curves_[key][0][1]))
-				
-							gcode += gcode_comment_str("End cutting path id: %s at depth %s\n\n"%(curves[key][0][0],max(z,curves_[key][0][1])))
+					#gcode += gcode_comment_str("End cutting path id: %s at depth: %s" % (curves[key][0][0],d))
+						
 
 							
 		self.export_gcode(gcode)

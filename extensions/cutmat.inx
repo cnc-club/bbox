@@ -19,6 +19,8 @@
 
 			<param name="hand-cut" type="boolean" _gui-text="Запустить упралвение станком">true</param>
 
+			<param name="multicut" type="string" _gui-text="Резка в несколько проходов (%;%;%)">20;40;100</param>
+
 			<_param name="help" type="description" xml:space="preserve">
 
 	Калибровочные коэффициенты</_param>
